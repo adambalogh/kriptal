@@ -1,0 +1,19 @@
+{
+  "name": "kriptal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "openai": "^4.19.0",
+    "telegraf": "^4.15.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.9.1",
+    "typescript": "^5.2.2"
+  }
+}
