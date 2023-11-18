@@ -1,3 +1,4 @@
+import { BigNumber, Utils } from 'alchemy-sdk';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -8,11 +9,21 @@ export class Token {
     symbol: string;
     name: string;
     address: string;
+    decimals: number;
 
-    constructor(symbol: string, name: string, address: string) {
+    constructor(symbol: string, name: string, address: string, decimals: number) {
         this.symbol = symbol;
         this.name = name;
         this.address = address;
+        this.decimals = decimals;
+    }
+
+    public amount(amount: number): BigNumber {
+        return BigNumber.from(10).pow(this.decimals).mul(amount);
+    }
+
+    public format(amount: string): string {
+        return Utils.formatUnits(amount, this.decimals);
     }
 }
 
@@ -24,5 +35,5 @@ export async function getTokens(): Promise<Token[]> {
     let content = JSON.parse(await fs.promises.readFile(arbTokensFile, 'utf8'));
     let tokens = content['tokens'];
 
-    return tokens.map((token: any) => new Token(token["symbol"], token["name"], token["address"]));
+    return tokens.map((token: any) => new Token(token["symbol"], token["name"], token["address"], token["decimals"]));
 }

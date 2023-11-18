@@ -15,6 +15,7 @@
     "ethers": "^6.8.1",
     "highland": "^2.13.5",
     "openai": "^4.19.0",
+    "qs": "^6.11.2",
     "telegraf": "^4.15.0"
   },
   "devDependencies": {
