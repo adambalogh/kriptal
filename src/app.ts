@@ -3,6 +3,9 @@ import { Telegraf } from "telegraf";
 import * as _ from 'highland';
 import { ethers } from "ethers";
 import { Alchemy, Network, Utils } from 'alchemy-sdk';
+import { getTrade } from "./exchange";
+import { coinBaseWalletUrl } from "./wallet";
+
 
 const settings = {
 	apiKey: process.env.ALCHEMY_KEY!,
@@ -105,10 +108,21 @@ async function processRun(thread: OpenAI.Beta.Threads.Thread, run: OpenAI.Beta.T
 					output: '30000',
 				}
 			} else if (call.function.name === 'swap_token') {
+				const args = JSON.parse(call.function.arguments);
+				const sell = args['from_token'];
+				const buy = args['to_token'];
+
+				const trade = await getTrade(
+					wallet.address,
+					sell,
+					buy,
+					args['amount'])
+
 				return {
 					tool_call_id: call.id,
-					output: 'Swapped for 5'
-				}
+					output: `Execute trade by clicking on "${coinBaseWalletUrl("google.com")}"`
+				};
+
 			} else if (call.function.name === 'get_user_tokens') {
 				let tokenBalances = await alchemy.core.getTokenBalances(wallet.address);
 				console.log(tokenBalances);

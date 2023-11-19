@@ -27,6 +27,13 @@ export class Token {
     }
 }
 
+export async function getToken(symbol: string): Promise<Token | undefined> {
+    const tokens = await getTokens();
+    const upperCaseSymbol = symbol.toUpperCase();
+
+    return tokens.find(token => token.symbol === upperCaseSymbol);
+}
+
 export async function getTokens(): Promise<Token[]> {
     if (arbTokens) {
         return arbTokens;

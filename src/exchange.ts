@@ -1,4 +1,4 @@
-import { Token, getTokens } from "./tokens";
+import { Token, getToken } from "./tokens";
 const qs = require('qs');
 
 const EXCHANGE_URL = "https://arbitrum.api.0x.org";
@@ -13,7 +13,21 @@ export class Trade {
     }
 }
 
-export async function getExchange(address: string, sell: Token, buy: Token, sellAmount: number): Promise<Trade> {
+export async function getTrade(address: string, sell: string, buy: string, sellAmount: number): Promise<Trade> {
+    const sellToken = await getToken(sell);
+    const buyToken = await getToken(buy);
+
+    if (sellToken === undefined) {
+        throw Error(`Token ${sell} not found`);
+    }
+    if (buyToken === undefined) {
+        throw Error(`Token ${buy} not found`);
+    }
+
+    return getTradeImpl(address, sellToken, buyToken, sellAmount);
+}
+
+async function getTradeImpl(address: string, sell: Token, buy: Token, sellAmount: number): Promise<Trade> {
     const params = {
         sellToken: sell.address, 
         buyToken: buy.address, 
