@@ -125,16 +125,18 @@ export class Bot {
                     const args = JSON.parse(call.function.arguments);
                     const sell = args['from_token'];
                     const buy = args['to_token'];
+                    const amount = args['amount'];
 
                     const trade = await getTrade(
                         address,
                         sell,
                         buy,
-                        args['amount'])
+                        amount);
 
+                    let exchangeUrl = `https://kriptal-app.vercel.app?sell=${trade.sellTokenAddr}&buy=${trade.buyTokenAddr}&amount=${trade.sellAmount}&taker=${address}`;
                     return {
                         tool_call_id: call.id,
-                        output: `Execute trade by clicking on "${coinBaseWalletUrl("google.com")}"`
+                        output: `Execute trade by clicking on "${coinBaseWalletUrl(exchangeUrl)}"`
                     };
 
                 } else if (call.function.name === 'get_user_tokens') {
