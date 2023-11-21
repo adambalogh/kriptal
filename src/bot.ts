@@ -4,6 +4,8 @@ import * as _ from 'highland';
 import { Alchemy, Network, Utils } from 'alchemy-sdk';
 import { getTrade } from "./exchange";
 import { coinBaseWalletUrl } from "./wallet";
+import { storeTrade } from "./storage";
+import { v4 as uuidv4 } from 'uuid';
 
 
 const ALCHEMY_SETTINGS = {
@@ -133,7 +135,10 @@ export class Bot {
                         buy,
                         amount);
 
-                    let exchangeUrl = `https://kriptal-app.vercel.app?sell=${trade.sellTokenAddr}&buy=${trade.buyTokenAddr}&amount=${trade.sellAmount}&taker=${address}`;
+                    let tradeId = uuidv4();
+                    await storeTrade(tradeId, trade);
+                    let exchangeUrl = `https://kriptal-app.vercel.app/trade/${tradeId}`;
+
                     return {
                         tool_call_id: call.id,
                         output: `Execute trade by clicking on "${coinBaseWalletUrl(exchangeUrl)}"`

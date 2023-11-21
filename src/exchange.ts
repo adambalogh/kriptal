@@ -15,6 +15,10 @@ export class Trade {
         this.buyTokenAddr = buyTokenAddr;
         this.buyAmount = buyAmount;
     }
+
+    static fromJson(obj: any): Trade {
+        return new Trade(obj.sellTokenAddr, obj.sellAmount, obj.buyTokenAddr, obj.buyAmount);
+    }
 }
 
 export async function getTrade(address: string, sell: string, buy: string, sellAmount: number): Promise<Trade> {

@@ -11,16 +11,19 @@
   "license": "ISC",
   "dependencies": {
     "@types/highland": "^2.12.18",
+    "@vercel/kv": "^1.0.0",
     "alchemy-sdk": "^3.0.0",
     "ethers": "^6.8.1",
     "highland": "^2.13.5",
     "openai": "^4.19.0",
     "qs": "^6.11.2",
-    "telegraf": "^4.15.0"
+    "telegraf": "^4.15.0",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.8",
     "@types/node": "^20.9.1",
+    "@types/uuid": "^9.0.7",
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
     "eslint": "^8.53.0",
