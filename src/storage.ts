@@ -1,10 +1,10 @@
 import { kv } from "@vercel/kv";
 import { Trade } from "./exchange";
 
-const TEN_MINUTES = 10 * 60;
+const ONE_HOUR = 60 * 60;
 
 export async function storeTrade(key: string, trade: Trade) {
-    let result = await kv.set(key, JSON.stringify(trade), { ex: TEN_MINUTES });
+    let result = await kv.set(key, JSON.stringify(trade), { ex: ONE_HOUR });
     console.log(`Saved key ${key}`);
 }
 
