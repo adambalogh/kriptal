@@ -106,8 +106,6 @@ export class Bot {
     private async processRun(thread: OpenAI.Beta.Threads.Thread, run: OpenAI.Beta.Threads.Run): Promise<string[]> {
         while (run.status !== 'requires_action' && run.status !== 'completed') {
             sleep(1000);
-            console.log(run.status);
-
             run = await openai.beta.threads.runs.retrieve(
                 thread.id,
                 run.id
@@ -192,6 +190,7 @@ export class Bot {
                 })
             }
 
+            console.log(assistantMessages.reverse());
             return assistantMessages.reverse();
 
         } else {
