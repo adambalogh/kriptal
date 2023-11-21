@@ -1,25 +1,9 @@
-import { Token, getToken } from "./tokens";
+import { getToken } from "./tokens";
+import { Token, Trade } from "./model";
 const qs = require('qs');
 
 const EXCHANGE_URL = "https://arbitrum.api.0x.org";
 
-export class Trade {
-    sellTokenAddr: string;
-    sellAmount: string;
-    buyTokenAddr: string;
-    buyAmount: string;
-
-    constructor(sellTokenAddr: string, sellAmount: string, buyTokenAddr: string, buyAmount: string) {
-        this.sellTokenAddr = sellTokenAddr;
-        this.sellAmount = sellAmount;
-        this.buyTokenAddr = buyTokenAddr;
-        this.buyAmount = buyAmount;
-    }
-
-    static fromJson(obj: any): Trade {
-        return new Trade(obj.sellTokenAddr, obj.sellAmount, obj.buyTokenAddr, obj.buyAmount);
-    }
-}
 
 export async function getTrade(address: string, sell: string, buy: string, sellAmount: number): Promise<Trade> {
     const sellToken = await getToken(sell);
@@ -57,8 +41,8 @@ async function getTradeImpl(address: string, sell: Token, buy: Token, sellAmount
     console.log(price);
 
     return new Trade(
-        sell.address,
+        sell,
+        buy,
         price['sellAmount'],
-        buy.address,
         price['buyAmount']);
 }

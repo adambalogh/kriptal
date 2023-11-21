@@ -1,31 +1,9 @@
-import { BigNumber, Utils } from 'alchemy-sdk';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Token } from './model';
 
 const arbTokensFile = path.join(__dirname, "../data/arb.json");
 let arbTokens: Token[] | undefined = undefined;
-
-export class Token {
-    symbol: string;
-    name: string;
-    address: string;
-    decimals: number;
-
-    constructor(symbol: string, name: string, address: string, decimals: number) {
-        this.symbol = symbol;
-        this.name = name;
-        this.address = address;
-        this.decimals = decimals;
-    }
-
-    public amount(amount: number): BigNumber {
-        return BigNumber.from(10).pow(this.decimals).mul(amount);
-    }
-
-    public format(amount: string): string {
-        return Utils.formatUnits(amount, this.decimals);
-    }
-}
 
 export async function getToken(symbol: string): Promise<Token | undefined> {
     const tokens = await getTokens();

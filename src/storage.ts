@@ -1,5 +1,5 @@
 import { kv } from "@vercel/kv";
-import { Trade } from "./exchange";
+import { Trade } from "./model";
 
 const ONE_HOUR = 60 * 60;
 
