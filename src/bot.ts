@@ -1,5 +1,5 @@
 import { OpenAI } from "openai";
-import { Telegraf } from "telegraf";
+import { Markup, Telegraf } from "telegraf";
 import * as _ from 'highland';
 import { Alchemy, Network, Utils } from 'alchemy-sdk';
 import { getTrade } from "./exchange";
@@ -21,6 +21,8 @@ const openai = new OpenAI({
 const bot: Telegraf = new Telegraf(process.env.TELEGRAM_BOT_KEY!);
 
 const address = process.env.ADDRESS!;
+
+type BotProgressUpdater = (msg: string) => void;
 
 export class Bot {
 
@@ -61,14 +63,15 @@ export class Bot {
 
         bot.on('message', async (ctx) => {
             console.log(ctx.message);
-
             ctx.sendChatAction("typing");
 
             if ("text" in ctx.message) {
-                let msg = ctx.message.text;
-                let responses = await this.handleMessage(`user-{ctx.message.from.id}`, msg);
+                let responses = await this.handleMessage(
+                    (msg: string) => ctx.reply(msg), `user-{ctx.message.from.id}`, ctx.message.text);
 
-                responses.forEach(msg => ctx.reply(msg));
+                responses.forEach(msg => ctx.reply(msg, {
+                    parse_mode: "Markdown"
+                }));
             } else {
                 ctx.reply("🤓");
             }
@@ -86,7 +89,7 @@ export class Bot {
         bot.stop(reason);
     }
 
-    private async handleMessage(userId: string, msg: string): Promise<string[]> {
+    private async handleMessage(progressUpdater: BotProgressUpdater, userId: string, msg: string): Promise<string[]> {
         let assistant = await this.getAssistant();
         let thread = await this.getThread(userId);
 
@@ -100,10 +103,13 @@ export class Bot {
             instructions: msg
         });
 
-        return this.processRun(thread, run);
+        return this.processRun(progressUpdater, thread, run);
     }
 
-    private async processRun(thread: OpenAI.Beta.Threads.Thread, run: OpenAI.Beta.Threads.Run): Promise<string[]> {
+    private async processRun(
+            progressUpdater: BotProgressUpdater,
+            thread: OpenAI.Beta.Threads.Thread,
+            run: OpenAI.Beta.Threads.Run): Promise<string[]> {
         while (run.status !== 'requires_action' && run.status !== 'completed') {
             sleep(1000);
             run = await openai.beta.threads.runs.retrieve(
@@ -116,7 +122,8 @@ export class Bot {
             let action = run.required_action!;
             let toolOutputs = await Promise.all(action.submit_tool_outputs.tool_calls.map(async call => {
                 console.log(call);
-                if (call.function.name === 'get_price') {
+
+                if (call.function.name === 'get_token_price') {
                     return {
                         tool_call_id: call.id,
                         output: '30000',
@@ -126,6 +133,8 @@ export class Bot {
                     const sell = args['from_token'];
                     const buy = args['to_token'];
                     const amount = args['amount'];
+
+                    progressUpdater(`Fetching prices for ${sell} and ${buy}`);
 
                     const trade = await getTrade(
                         address,
@@ -144,6 +153,8 @@ export class Bot {
                     await storeTrade(tradeId, trade);
                     let exchangeUrl = `https://kriptal-app.vercel.app/trade?id=${tradeId}`;
 
+                    progressUpdater(`Found match, generating trade link`);
+
                     return {
                         tool_call_id: call.id,
                         output: `The user can swap ${trade.sellAmount} ${trade.sell.name} for ${trade.buyAmount} ${trade.buy.name} 
@@ -151,7 +162,7 @@ export class Bot {
                             "${coinBaseWalletUrl(exchangeUrl)}"`
                     };
 
-                } else if (call.function.name === 'get_user_tokens') {
+                } else if (call.function.name === 'list_user_tokens') {
                     let tokenBalances = await alchemy.core.getTokenBalances(address);
                     console.log(tokenBalances);
 
@@ -159,7 +170,7 @@ export class Bot {
                         .filter(balance => Utils.formatEther(balance.tokenBalance || "") !== "0.0")
                         .map(async balance => {
                             let metadata = await alchemy.core.getTokenMetadata(balance.contractAddress);
-                            return `${metadata.name}: ${truncate(Utils.formatEther(balance.tokenBalance || ""))}`;
+                            return `${metadata.name}: ${truncate(Utils.formatUnits(balance.tokenBalance || "", metadata.decimals || 18))}`;
                         }));
 
                     let ethBalance = Utils.formatEther(await alchemy.core.getBalance(address));
@@ -182,7 +193,7 @@ export class Bot {
                 {tool_outputs: toolOutputs}
             );
 
-            return this.processRun(thread, run);
+            return this.processRun(progressUpdater, thread, run);
         } else if (run.status === 'completed') {
             const threadMessages = await openai.beta.threads.messages.list(thread.id);
 
