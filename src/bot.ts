@@ -147,8 +147,8 @@ export class Bot {
                     return {
                         tool_call_id: call.id,
                         output: `The user can swap ${trade.sellAmount} ${trade.sell.name} for ${trade.buyAmount} ${trade.buy.name} 
-                        by clicking on this link that will take the user to his/her wallet (to a trusted website)
-                        "${coinBaseWalletUrl(exchangeUrl)}"`
+                            by clicking on this link that will take the user to his/her wallet (to a trusted website)
+                            "${coinBaseWalletUrl(exchangeUrl)}"`
                     };
 
                 } else if (call.function.name === 'get_user_tokens') {
