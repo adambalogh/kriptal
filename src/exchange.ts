@@ -5,15 +5,15 @@ const qs = require('qs');
 const EXCHANGE_URL = "https://arbitrum.api.0x.org";
 
 
-export async function getTrade(address: string, sell: string, buy: string, sellAmount: number): Promise<Trade> {
+export async function getTrade(address: string, sell: string, buy: string, sellAmount: number): Promise<Trade | string> {
     const sellToken = await getToken(sell);
     const buyToken = await getToken(buy);
 
     if (sellToken === undefined) {
-        throw Error(`Token ${sell} not found`);
+        return `Token ${sell} not found in list`;
     }
     if (buyToken === undefined) {
-        throw Error(`Token ${buy} not found`);
+        return `Token ${buy} not found in list`;
     }
 
     return getTradeImpl(address, sellToken, buyToken, sellAmount);

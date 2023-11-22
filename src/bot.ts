@@ -133,6 +133,13 @@ export class Bot {
                         buy,
                         amount);
 
+                    if (typeof trade === 'string') {
+                        return {
+                            tool_call_id: call.id,
+                            output: `Error: ${trade}`
+                        };
+                    }
+
                     let tradeId = uuidv4();
                     await storeTrade(tradeId, trade);
                     let exchangeUrl = `https://kriptal-app.vercel.app/trade?id=${tradeId}`;
